@@ -10,19 +10,19 @@ The APP will have following parts:
 
 ## ✨ Test Front End
 Run the following codes from home diretory
-# Install modules
+#### Install modules
 ```
 pip3 install -r requirements.txt
 ```
-# Set the FLASK_APP environment variable
+#### Set the FLASK_APP environment variable
 ```
 set FLASK_APP = app.py
 ```
-# Run the FLASK_APP
+#### Run the FLASK_APP
 ```
 flask run
 ```
-# Access the Web APP
-```
+#### Access the Web APP
+```å
 http://127.0.0.1:5000/
 ```
