@@ -16,7 +16,7 @@ pip3 install -r requirements.txt
 ```
 #### Set the FLASK_APP environment variable
 ```
-set FLASK_APP = app.py
+set FLASK_APP = EVCSM.py
 ```
 #### Run the FLASK_APP
 ```
