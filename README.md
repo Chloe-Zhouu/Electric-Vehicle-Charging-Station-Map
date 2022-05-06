@@ -7,3 +7,13 @@ The APP will have following parts:
 - Locate all feasible locations to charge the car
 - Perform optimization considering distance, grid balance and congestion to find the best location for charging (we can even have a grading system and say the first best, the second best, etc.)
 - Maximum points are awarded if you choose to charge your car at the first best location, less points if you choose second best and so on. You can redeem your points for a free charging when you reach a limit.
+## ✨ Test Front End
+Run the following codes from home diretory
+#### Install modules
+```
+pip3 install -r requirements.txt
+```
+Run all cells from the `ev_routing_based_on_start_end.ipynb` file. 
+
+Specify the start city in `dijkstra_algorithm` function. Specify the start city again and end city in `print_function`. Running `print_result` function will display the best route between cities. The `path_with_charging` list contains the cities the car must pass through and where it needs to charge.
+
