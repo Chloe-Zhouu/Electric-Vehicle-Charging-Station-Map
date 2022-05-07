@@ -461,6 +461,34 @@
                                 <div id="includedContent"></div>
                             </div>
                         </div>
+
+                        <div class="col-xl-4 col-lg-5">
+                            <div class="card shadow mb-4">
+                                <form action="/location" method="post">
+                                    {{ form.hidden_tag() }}
+                                    <div class="form-group">
+                                        {{form.start_location.label}} <br>
+                                        {{form.start_location(size=32)}}
+                                    </div>
+                                    <div class="form-group">
+                                        {{form.end_location.label}} <br>
+                                        {{form.end_location(size=32)}}
+                                    </div>
+                                    <p>{{form.submit()}}</p>
+                                </form>
+                                <!-- <form action="/location" method="post">
+                                    <div class="form-group">
+                                      <label for="starting_point">Starting location</label>
+                                      <input type="text" class="form-control" id="starting_point" aria-describedby="emailHelp" placeholder="Enter starting point">
+                                    </div>
+                                    <div class="form-group">
+                                      <label for="ending_point">Ending location</label>
+                                      <input type="text" class="form-control" id="ending_point" placeholder="Enter ending point">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Search</button>
+                                  </form> -->
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Content Row -->
@@ -684,6 +712,55 @@
           $("#includedContent").load("map"); 
         });
     </script>
+    <!-- <script>
+        var options = {
+            enableHighAccuracy: true,
+            timeout: 5000,
+            maximumAge: 0
+          };
+          
+        function success(pos) {
+            var crd = pos.coords;
+
+            let xhr = new XMLHttpRequest();
+            let url = "/location";
+
+            // open a connection
+            xhr.open("POST", url, true);
+
+            // Set the request header i.e. which type of content you are sending
+            xhr.setRequestHeader("Content-Type", "application/json");
+
+            // Create a state change callback
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+
+                    // Print received data from server
+                    result.innerHTML = this.responseText;
+
+                }
+            };
+
+            // Converting JSON data to string
+            var data = JSON.stringify({ "Latitude": crd.latitude,
+                                        "Longitude": crd.longitude
+            });
+
+            // Sending data with the request
+            xhr.send(data);
+          
+            // console.log('Your current position is:');
+            // console.log(`Latitude : ${crd.latitude}`);
+            // console.log(`Longitude: ${crd.longitude}`);
+            // console.log(`More or less ${crd.accuracy} meters.`);
+        }
+          
+          function error(err) {
+            console.warn(`ERROR(${err.code}): ${err.message}`);
+          }
+          
+          navigator.geolocation.getCurrentPosition(success, error, options);
+    </script> -->
 </body>
 
 </html>
