@@ -135,7 +135,7 @@ def print_result(previous_nodes, shortest_path, start_node, target_node):
                 path_with_charging.append(end_city)
                 running_dist += dist
     
-    return path_with_charging
+    return list(reversed(path))
 
 cities_location = {
     'Portsmouth' : {'lat': 50.798908, 'lon': -1.091160},
@@ -156,6 +156,8 @@ cities_location = {
     'Hull' : {'lat': 53.767750, 'lon': -0.335827},
     'Nottingham' : {'lat': 52.95, 'lon': -1.15},
 }
+
+cities_location_2 = {city: (location['lat'], location['lon']) for (city, location) in cities_location.items()}
 
 cities = list(cities_location.keys())
 

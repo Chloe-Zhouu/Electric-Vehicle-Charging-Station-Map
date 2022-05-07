@@ -481,7 +481,7 @@
                                 <!-- Card Body -->
                                 <div class="card-body">
                                     <div class="chart-area">
-                                        <div id="includedContent"></div>
+                                        <div id="map" style="height: 100%;"></div>
                                     </div>
                                 </div>
                             </div>
@@ -492,7 +492,7 @@
                                 <!-- Card Header - Dropdown -->
                                 <div
                                     class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                                    <h6 class="m-0 font-weight-bold text-primary">Revenue Sources</h6>
+                                    <h6 class="m-0 font-weight-bold text-primary">Search</h6>
                                     <div class="dropdown no-arrow">
                                         <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
                                             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -523,17 +523,6 @@
                                             </div>
                                             <p>{{form.submit()}}</p>
                                         </form>
-                                    </div>
-                                    <div class="mt-4 text-center small">
-                                        <span class="mr-2">
-                                            <i class="fas fa-circle text-primary"></i> Direct
-                                        </span>
-                                        <span class="mr-2">
-                                            <i class="fas fa-circle text-success"></i> Social
-                                        </span>
-                                        <span class="mr-2">
-                                            <i class="fas fa-circle text-info"></i> Referral
-                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -757,59 +746,41 @@
     <script src="{{url_for('static', filename = 'js/demo/chart-area-demo.js')}}"></script>
     <script src="{{url_for('static', filename = 'js/demo/chart-pie-demo.js')}}"></script>
     <script>
-        $(function(){
-          $("#includedContent").load("map"); 
-        });
-    </script>
-    <!-- <script>
-        var options = {
-            enableHighAccuracy: true,
-            timeout: 5000,
-            maximumAge: 0
-          };
-          
-        function success(pos) {
-            var crd = pos.coords;
-
-            let xhr = new XMLHttpRequest();
-            let url = "/location";
-
-            // open a connection
-            xhr.open("POST", url, true);
-
-            // Set the request header i.e. which type of content you are sending
-            xhr.setRequestHeader("Content-Type", "application/json");
-
-            // Create a state change callback
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-
-                    // Print received data from server
-                    result.innerHTML = this.responseText;
-
-                }
-            };
-
-            // Converting JSON data to string
-            var data = JSON.stringify({ "Latitude": crd.latitude,
-                                        "Longitude": crd.longitude
+        function initMap() {
+            const directionsService = new google.maps.DirectionsService();
+            const directionsRenderer = new google.maps.DirectionsRenderer();
+            const waypts = [];
+            const sth = {{pts|safe}};
+            var sthLength = sth.length;
+            const map = new google.maps.Map(document.getElementById("map"), {
+              zoom: 7,
+              center: { lat: 41.85, lng: -87.65 },
             });
-
-            // Sending data with the request
-            xhr.send(data);
           
-            // console.log('Your current position is:');
-            // console.log(`Latitude : ${crd.latitude}`);
-            // console.log(`Longitude: ${crd.longitude}`);
-            // console.log(`More or less ${crd.accuracy} meters.`);
-        }
-          
-          function error(err) {
-            console.warn(`ERROR(${err.code}): ${err.message}`);
+            directionsRenderer.setMap(map);
+            
+            for (var i =0; i < sthLength; i++) { 
+              waypts.push({ location: sth[i], stopover: true, }); 
+            }
+        
+            directionsService
+              .route({
+                origin: "{{data.starting_point}}",
+                destination: "{{data.ending_point}}",
+                waypoints: waypts,
+                travelMode: google.maps.TravelMode.DRIVING,
+              })
+              .then((response) => {
+                directionsRenderer.setDirections(response);
+              })
+              .catch((e) => window.alert("Directions request failed due to " + status));
           }
-          
-          navigator.geolocation.getCurrentPosition(success, error, options);
-    </script> -->
+          window.initMap = initMap;
+    </script>
+    <script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBp65Y-WWQWr1zeK0ldsdSWVX9g9TTLMwk&callback=initMap&v=weekly"
+    defer
+    ></script>
 </body>
 
 </html>

@@ -1,8 +1,10 @@
 from app import app
 from flask import render_template, redirect
 from app.forms import LocationForm
+from app.dijkstra import *
 
 import os
+import json
 from ipywidgets.embed import embed_minimal_html
 import gmaps
 
@@ -15,7 +17,9 @@ gmaps.configure(api_key=MAPS_API_KEY)
 @app.route('/index')
 def index():
     form = LocationForm()
-    return render_template('index.html', form=form)
+    data = {'starting_point': 'London, UK', 'ending_point': 'Hull, UK'}
+    pts = json.dumps(['Leicester, UK'])
+    return render_template('index.html', form=form, data=data, pts=pts)
 
 @app.route('/map')
 def map():
@@ -32,13 +36,11 @@ def register():
 @app.route('/location', methods=['GET','POST'])
 def get_location():
     form = LocationForm()
-    # print("starting point: {} and ending point: {}".format(
-    #         form.start_location.data, form.end_location.data))
-    # print(type(form.start_location.data))
-    marker_locations = [(float(form.start_location.data), float(form.end_location.data))]
+    starting_point = form.start_location.data
+    ending_point = form.end_location.data
 
-    fig = gmaps.figure()
-    markers = gmaps.marker_layer(marker_locations)
-    fig.add_layer(markers)
-    embed_minimal_html('app/templates/export.html', views=[fig])
-    return redirect('/index')
+    previous_nodes, shortest_path = dijkstra_algorithm(graph=graph, start_node=starting_point)
+    path = print_result(previous_nodes, shortest_path, start_node=starting_point, target_node=ending_point)
+    data = {'starting_point': "{}, UK".format(path[0]), 'ending_point': "{}, UK".format(path[-1])}
+    pts = json.dumps(["{}, UK".format(city) for city in path[1:-1]])
+    return render_template('index.html', form=form, data=data, pts=pts)
