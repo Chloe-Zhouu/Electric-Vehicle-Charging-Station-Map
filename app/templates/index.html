@@ -777,9 +777,15 @@
               .then((response) => {
                 directionsRenderer.setDirections(response);
                 const route = response.routes[0];
+                var total_distance = 0;
+                for (let i = 0; i < route.legs.length; i++) {
+                    total_distance += parseInt(route.legs[i].distance.text)
+                }
+
                 const summaryPanel = document.getElementById("directions-panel");
         
-                summaryPanel.innerHTML = "";
+                summaryPanel.innerHTML = "The total length of your driving route is <b>" + total_distance+ "</b> Kilometers and it consists of the following segments: <br><br>"
+
         
                 // For each route, display summary information.
                 for (let i = 0; i < route.legs.length; i++) {
