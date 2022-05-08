@@ -191,11 +191,11 @@ def locator(SOC, city_name, cities_location):#, car_coordinate):
     #Charging station specs
     #Source London Charging Station
 
-    CS1 = {'Name': 'CS1', 'Power': 12, 'Location':(51.52, -0.13), 'Vehicle-to-Charger Connection': 'SAE J1772', 'Capacity': 10, 'Network Security': '128-bit AES Encryption', 'Load': 100}
+    CS1 = {'Name': 'CS1', 'Power': 12, 'Location':(51.47828, -0.51544), 'Vehicle-to-Charger Connection': 'SAE J1772', 'Capacity': 10, 'Network Security': '128-bit AES Encryption', 'Load': 100}
 
-    CS2 = {'Name': 'CS2', 'Power': 7.2, 'Location':(51.53, -0.19), 'Vehicle-to-Charger Connection': 'SAE J1772', 'Capacity': 5, 'Network Security': '128-bit AES Encryption', 'Load': 80}
+    CS2 = {'Name': 'CS2', 'Power': 7.2, 'Location':(51.13518, -0.19114), 'Vehicle-to-Charger Connection': 'SAE J1772', 'Capacity': 5, 'Network Security': '128-bit AES Encryption', 'Load': 80}
 
-    CS3 = {'Name': 'CS3', 'Power': 15, 'Location':(51.50, -0.15), 'Vehicle-to-Charger Connection': 'SAE J1772', 'Capacity': 20, 'Network Security': '128-bit AES Encryption', 'Load': 20}
+    CS3 = {'Name': 'CS3', 'Power': 15, 'Location':(51.51182, -0.13763), 'Vehicle-to-Charger Connection': 'SAE J1772', 'Capacity': 20, 'Network Security': '128-bit AES Encryption', 'Load': 20}
 
     city_chargers = {'London':[CS1, CS2, CS3]}
     #city_chargers = {'Oxford':[CS1, CS2, CS3]}
@@ -259,7 +259,7 @@ def locator(SOC, city_name, cities_location):#, car_coordinate):
 
     return (str(feasible_CS[i]['Location'][0]), str(feasible_CS[i]['Location'][1]))
 
-max_ev_driving_dist = 150 #in miles
+max_ev_driving_dist = 175 #in miles
 
 cities_location = {
     'Portsmouth' : {'lat': 50.798908, 'lon': -1.091160},
@@ -350,6 +350,9 @@ init_graph['Nottingham']['Birmingham'] = 52
 
 init_graph['Birmingham']['Liverpool'] = 99
 init_graph['Liverpool']['Birmingham'] = 99
+
+init_graph['Bristol']['Cardiff'] = 41.9
+init_graph['Cardiff']['Bristol'] = 41.9
 
 
 graph = Graph(cities, init_graph)
