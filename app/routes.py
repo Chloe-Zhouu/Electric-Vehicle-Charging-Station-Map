@@ -74,3 +74,12 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for('index'))
+
+
+@app.route('/profile')
+def profile():
+    return render_template('profile.html')
+
+@app.route('/cars')
+def cars():
+    return render_template('cars.html')
