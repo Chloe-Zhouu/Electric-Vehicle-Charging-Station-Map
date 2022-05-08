@@ -1,3 +1,9 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import pyomo
+import math
+import pyomo.environ as pyo
+from pyomo.environ import *
 import sys
 
 class Graph(object):
@@ -37,6 +43,7 @@ class Graph(object):
     def value(self, node1, node2):
         "Returns the value of an edge between two nodes."
         return self.graph[node1][node2]
+
 
 
 def dijkstra_algorithm(graph, start_node):
@@ -79,10 +86,8 @@ def dijkstra_algorithm(graph, start_node):
     
     return previous_nodes, shortest_path
 
-def print_result(previous_nodes, shortest_path, start_node, target_node):
-    
-    #Define maximum distance EV can drive in miles
-    max_ev_driving_dist = 150 #in miles
+
+def print_result(previous_nodes, shortest_path, max_driving_dist, start_node, target_node):
     
     path = []
     node = target_node
@@ -135,7 +140,126 @@ def print_result(previous_nodes, shortest_path, start_node, target_node):
                 path_with_charging.append(end_city)
                 running_dist += dist
     
-    return list(reversed(path))
+    ######################################################################################################
+    #Display results. Here the path_with_charging list contains the cities and charging station locations#
+    ######################################################################################################
+    print()
+    print("We found the following best path with a minimum distance of {} miles:".format(shortest_path[target_node]))
+    print()
+    print(" -> ".join(reversed(path)))
+    print()
+    print('If we include charging stations this path looks like:')
+    print()
+    print(" -> ".join(path_with_charging))
+    
+    return path_with_charging
+
+def get_first_city_to_charge(lst):
+    for ii, item in enumerate(lst):
+        if item == "Charge Car":
+            return lst[ii-1]
+
+def get_EV_SOC(shortest_path, max_driving_distance, city):
+    return shortest_path[city]/max_driving_distance
+
+def replace_city_with_charger(lst, city, coords):
+    lst_ = []
+    i = 0
+    for ii, item in enumerate(lst):
+        if item == city and i == 0:
+            lst_.append(coords)
+            i += 1
+        else:
+            lst_.append(item)
+    return lst_
+
+def locator(SOC, city_name, cities_location):#, car_coordinate):
+    
+    car_coordinate = (str(cities_location[city_name]['lat']), str(cities_location[city_name]['lon']))
+
+    #Car Specs: Tesla Model 3 Long Range Dual Motor
+
+    battery_cap = 82.0 #kWh
+    Efficiency = 0.122 #kWh/km
+    Fast_charge_time = 0.5
+    Charge_Power = 11 #kW
+    Charge_time = 8.25
+    car_coordinate = (float(car_coordinate[0]), float(car_coordinate[1]))
+    starting_loc = car_coordinate
+    #destination_loc = (180.3, 30)
+
+    #Charging station specs
+    #Source London Charging Station
+
+    CS1 = {'Name': 'CS1', 'Power': 12, 'Location':(51.52, -0.13), 'Vehicle-to-Charger Connection': 'SAE J1772', 'Capacity': 10, 'Network Security': '128-bit AES Encryption', 'Load': 100}
+
+    CS2 = {'Name': 'CS2', 'Power': 7.2, 'Location':(51.53, -0.19), 'Vehicle-to-Charger Connection': 'SAE J1772', 'Capacity': 5, 'Network Security': '128-bit AES Encryption', 'Load': 80}
+
+    CS3 = {'Name': 'CS3', 'Power': 15, 'Location':(51.50, -0.15), 'Vehicle-to-Charger Connection': 'SAE J1772', 'Capacity': 20, 'Network Security': '128-bit AES Encryption', 'Load': 20}
+
+    city_chargers = {'London':[CS1, CS2, CS3]}
+    #city_chargers = {'Oxford':[CS1, CS2, CS3]}
+
+
+
+
+
+    #distance = math.sqrt((starting_loc[0] - destination_loc[0])**2 + (starting_loc[1] - destination_loc[1])**2)
+
+    car_consumption = battery_cap - SOC
+
+    balance_point = car_consumption
+    for i in range(len(city_chargers[city_name])):
+        balance_point += city_chargers[city_name][i]['Load']
+    balance_point = balance_point/(len(city_chargers[city_name]) + 2)
+
+
+
+    feasible_CS = []
+    distances = []
+
+    distance_car_goes = SOC/Efficiency
+
+    for i in range(len(city_chargers[city_name])):
+
+        if Charge_Power < city_chargers[city_name][i]['Power']:
+            dist = math.sqrt((starting_loc[0] \
+                              - city_chargers[city_name][i]['Location'][0])**2 \
+                             + (starting_loc[1] - city_chargers[city_name][i]['Location'][1])**2)
+            distances.append(dist)
+
+            if dist < distance_car_goes:
+                feasible_CS.append(city_chargers[city_name][i])
+    
+
+
+
+    #Optimization
+    model = pyo.ConcreteModel()
+    model.I = pyo.Var([i for i in range(len(feasible_CS))], domain=pyo.Binary)
+
+    def obj_expression(model):
+        return sum(model.I[j] * (balance_point - feasible_CS[j]['Load'])**2 for j in range(len(feasible_CS)))
+
+    model.OBJ = pyo.Objective(rule=obj_expression, sense=pyo.minimize)
+
+    def ax_constraint_rule(m):
+        return sum(model.I[j] for j in range(len(feasible_CS))) == 1
+
+    model.AxbConstraint = pyo.Constraint(rule=ax_constraint_rule)
+
+
+    solver = pyo.SolverFactory('cplex_direct')
+    solver.solve(model)
+    #model.I.display()
+    
+    for i in range(len(feasible_CS)):
+        if model.I[i].value == 1:
+            print('Suggested:', feasible_CS[i]['Name'])
+
+    return (str(feasible_CS[i]['Location'][0]), str(feasible_CS[i]['Location'][1]))
+
+max_ev_driving_dist = 150 #in miles
 
 cities_location = {
     'Portsmouth' : {'lat': 50.798908, 'lon': -1.091160},
@@ -157,15 +281,13 @@ cities_location = {
     'Nottingham' : {'lat': 52.95, 'lon': -1.15},
 }
 
-cities_location_2 = {city: (location['lat'], location['lon']) for (city, location) in cities_location.items()}
-
 cities = list(cities_location.keys())
 
 init_graph = {}
 for city in cities:
     init_graph[city] = {}
-    
-#All distances in miles    
+
+#All distances in miles
 init_graph['Portsmouth']['Southampton'] = 19.5
 init_graph['Southampton']['Portsmouth'] = 19.5
 
@@ -229,5 +351,18 @@ init_graph['Nottingham']['Birmingham'] = 52
 init_graph['Birmingham']['Liverpool'] = 99
 init_graph['Liverpool']['Birmingham'] = 99
 
+
 graph = Graph(cities, init_graph)
-    
+
+# previous_nodes, shortest_path = dijkstra_algorithm(graph=graph, start_node="Bristol")
+# print_result(previous_nodes, shortest_path, max_ev_driving_dist, start_node="Bristol", target_node="Brighton")
+# l = print_result(previous_nodes, shortest_path, max_ev_driving_dist, start_node="Bristol", target_node="Brighton")
+
+# charging_city = get_first_city_to_charge(l)
+
+# EV_SOC = get_EV_SOC(shortest_path, max_ev_driving_dist, charging_city)
+
+# supercharger_coords = locator(EV_SOC, charging_city, cities_location)
+
+# path_with_supercharger_coords = replace_city_with_charger(l, charging_city, supercharger_coords)
+# print(path_with_supercharger_coords)

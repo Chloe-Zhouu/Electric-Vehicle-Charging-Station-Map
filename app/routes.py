@@ -30,10 +30,29 @@ def get_location():
     starting_point = form.start_location.data
     ending_point = form.end_location.data
 
+    print(starting_point)
+    print(ending_point)
+
     previous_nodes, shortest_path = dijkstra_algorithm(graph=graph, start_node=starting_point)
-    path = print_result(previous_nodes, shortest_path, start_node=starting_point, target_node=ending_point)
+    l = print_result(previous_nodes, shortest_path, max_ev_driving_dist, start_node=starting_point, target_node=ending_point)
+    charging_city = get_first_city_to_charge(l)
+    EV_SOC = get_EV_SOC(shortest_path, max_ev_driving_dist, charging_city)
+    supercharger_coords = locator(EV_SOC, charging_city, cities_location)
+    path = replace_city_with_charger(l, charging_city, supercharger_coords)
+
     data = {'starting_point': "{}, UK".format(path[0]), 'ending_point': "{}, UK".format(path[-1])}
-    pts = json.dumps(["{}, UK".format(city) for city in path[1:-1]])
+    charging_station_index = path[1:-1].index('Charge Car')-1
+
+    pts = []
+    for (i,value) in enumerate(path[1:-1]):
+        if i == charging_station_index:
+            pts.append(path[1:-1][i][0]+" "+path[1:-1][i][1])
+        elif i == charging_station_index + 1:
+            continue
+        else:
+            pts.append("{}, UK".format(value))
+
+    pts = json.dumps(pts)
     return render_template('index.html', form=form, data=data, pts=pts)
 
 
