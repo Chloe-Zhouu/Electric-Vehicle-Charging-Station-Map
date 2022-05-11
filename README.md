@@ -7,3 +7,22 @@ The APP will have following parts:
 - Locate all feasible locations to charge the car
 - Perform optimization considering distance, grid balance and congestion to find the best location for charging (we can even have a grading system and say the first best, the second best, etc.)
 - Maximum points are awarded if you choose to charge your car at the first best location, less points if you choose second best and so on. You can redeem your points for a free charging when you reach a limit.
+
+## ✨ Test Front End
+Run the following codes from home diretory
+#### Install modules
+```
+pip3 install -r requirements.txt
+```
+#### Set the FLASK_APP environment variable
+```
+set FLASK_APP = EVCSM.py
+```
+#### Run the FLASK_APP
+```
+flask run
+```
+#### Access the Web APP
+```å
+http://127.0.0.1:5000/
+```
